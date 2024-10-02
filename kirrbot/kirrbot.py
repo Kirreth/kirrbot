@@ -74,7 +74,7 @@ async def check_youtube_channel():
                     minutes += int(minutes_part)
                 
                 if minutes >= 2:
-                    message = f"Hey @everyone **Niklas Steenfatt** hat gerade ein neues Video gepostet. Schau es dir bis zum Schluss an und hinterlasse einen netten Kommentar. 🙌 \n[{video_title}]({video_link})"
+                    message = f"Hey @everyone **Youtuber XY** hat gerade ein neues Video gepostet. Schau es dir bis zum Schluss an und hinterlasse einen netten Kommentar. 🙌 \n[{video_title}]({video_link})"
                     
                     # Video-Link in der Datenbank speichern
                     zeiger.execute("INSERT INTO videos (link) VALUES (?)", (video_link,))
