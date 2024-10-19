@@ -4,6 +4,7 @@ import discord
 from googleapiclient.discovery import build
 import asyncio
 import sqlite3
+import os
 
 # Datenbank-Verbindung
 verbindung = sqlite3.connect("videos.db")
@@ -17,8 +18,6 @@ api_key = "KEY"
 # YouTube Kanal ID
 channel_id = "Kanal-ID"
 
-# Discord Bot Token
-discord_token = "TOKEN"
 
 # Kanal-ID, in dem die Nachricht gepostet werden soll
 discord_channel_id = "Discord-Channel-ID"
@@ -91,4 +90,4 @@ async def post_to_discord(message):
     channel = client.get_channel(int(discord_channel_id))
     await channel.send(message)
 
-client.run(discord_token)
+client.run(os.getenv('Token')
