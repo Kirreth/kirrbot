@@ -1,37 +1,63 @@
-﻿# -*- coding: utf-8 -*-
-
-import discord
-from googleapiclient.discovery import build
-import asyncio
+﻿# -*- coding: iso-8859-1 -*-
+import random
 import sqlite3
+import asyncio
+import discord
+from discord.ext import commands
+from datetime import datetime
+from googleapiclient.discovery import build
+import requests
+import re
 import os
 
-# Datenbank-Verbindung
+
 verbindung = sqlite3.connect("videos.db")
 zeiger = verbindung.cursor()
 zeiger.execute("CREATE TABLE IF NOT EXISTS videos(link VARCHAR(50))")
 verbindung.commit()
 
 # YouTube Data API Schlüssel
-api_key = "KEY"
+api_key = "API-KEY"
 
 # YouTube Kanal ID
-channel_id = "Kanal-ID"
-
+channel_id = "KANAL-ID"
 
 # Kanal-ID, in dem die Nachricht gepostet werden soll
-discord_channel_id = "Discord-Channel-ID"
-
-# Verbindung zum Discord-Client herstellen
-client = discord.Client(intents=discord.Intents.all())
+discord_channel_id = 'CHANNEL-ID'
 
 # YouTube API Verbindung herstellen
 youtube = build('youtube', 'v3', developerKey=api_key)
 
-@client.event
+# Intent mit message_content hinzufügen
+intents = discord.Intents.all()
+intents.message_content = True
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+@bot.event
 async def on_ready():
-    print(f'Eingeloggt als {client.user}')
+    print("Bot is Up and Ready!")
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} command(s)")
+    except Exception as e:
+        print(e)
+        
     await check_youtube_channel()
+
+@bot.event
+async def on_message(msg):
+    if msg.author.id == bot.user.id:
+        return
+
+    msg_content = msg.content.lower()
+    curse_words = ['discord.com/invite']
+    
+    # delete curse word if match with the list
+    if any(word in msg_content for word in curse_words):
+        await msg.delete()
+
+    # Befehlsverarbeitung zulassen
+    await bot.process_commands(msg)
 
 # Funktion zum Überprüfen des YouTube-Kanals auf neue Videos
 async def check_youtube_channel():
@@ -40,7 +66,8 @@ async def check_youtube_channel():
             part='snippet',
             channelId=channel_id,
             maxResults=1,  # Anzahl der Videos, die abgerufen werden sollen
-            order='date'   # Sortierung nach Datum
+            order='date',
+            type='video'# Sortierung nach Datum
         ).execute()
 
         for item in response['items']:
@@ -73,7 +100,7 @@ async def check_youtube_channel():
                     minutes += int(minutes_part)
                 
                 if minutes >= 2:
-                    message = f"Hey @everyone **Youtuber XY** hat gerade ein neues Video gepostet. Schau es dir bis zum Schluss an und hinterlasse einen netten Kommentar. 🙌 \n[{video_title}]({video_link})"
+                    message = f"Hey @everyone **Niklas Steenfatt** hat gerade ein neues Video gepostet. Schau es dir bis zum Schluss an und hinterlasse einen netten Kommentar. \n[{video_title}]({video_link})"
                     
                     # Video-Link in der Datenbank speichern
                     zeiger.execute("INSERT INTO videos (link) VALUES (?)", (video_link,))
@@ -83,11 +110,14 @@ async def check_youtube_channel():
                     await post_to_discord(message)
 
         # Warte 60 Sekunden, bevor der Kanal erneut überprüft wird
-        await asyncio.sleep(60)
+        await asyncio.sleep(900)
 
 # Funktion zum Posten einer Nachricht in einem Discord-Kanal
 async def post_to_discord(message):
-    channel = client.get_channel(int(discord_channel_id))
-    await channel.send(message)
+    channel = bot.get_channel(int(discord_channel_id))
+    await channel.send(message)    
+    
 
-client.run(os.getenv('Token')
+
+# Bot starten
+bot.run(os.getenv('TOKEN'))
