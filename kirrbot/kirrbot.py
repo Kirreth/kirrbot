@@ -58,7 +58,7 @@ async def on_message(msg):
     msg_content = msg.content.lower()
     curse_words = ['discord.com/invite']
     
-    # delete curse word if match with the list
+    # Nachricht prüfen und löschen, falls Übereinstimmung mit curse_words
     if any(word in msg_content for word in curse_words):
         await msg.delete()
 
@@ -71,9 +71,9 @@ async def check_youtube_channel():
         response = youtube.search().list(
             part='snippet',
             channelId=channel_id,
-            maxResults=1,  # Anzahl der Videos, die abgerufen werden sollen
+            maxResults=1,  
             order='date',
-            type='video'# Sortierung nach Datum
+            type='video'
         ).execute()
 
         for item in response['items']:
@@ -115,7 +115,7 @@ async def check_youtube_channel():
                     # Nachricht an Discord senden
                     await post_to_discord(message)
 
-        # Warte 60 Sekunden, bevor der Kanal erneut überprüft wird
+        # Warte 900 Sekunden, bevor der Kanal erneut überprüft wird
         await asyncio.sleep(900)
 
 # Funktion zum Posten einer Nachricht in einem Discord-Kanal
