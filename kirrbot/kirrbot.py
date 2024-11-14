@@ -8,7 +8,13 @@ from datetime import datetime
 from googleapiclient.discovery import build
 import requests
 import re
+from dotenv import load_dotenv
 import os
+
+
+load_dotenv()
+
+TOKEN = os.getenv('TOKEN')
 
 
 verbindung = sqlite3.connect("videos.db")
@@ -17,19 +23,20 @@ zeiger.execute("CREATE TABLE IF NOT EXISTS videos(link VARCHAR(50))")
 verbindung.commit()
 
 # YouTube Data API Schlüssel
-api_key = "API-KEY"
+api_key = os.getenv('YOUTUBE-API')
 
 # YouTube Kanal ID
-channel_id = "KANAL-ID"
+channel_id = os.getenv('YOUTUBE-CHANNEL')
 
 # Kanal-ID, in dem die Nachricht gepostet werden soll
-discord_channel_id = 'CHANNEL-ID'
+discord_channel_id = os.getenv('DISCORD-CHANNEL')
 
 # YouTube API Verbindung herstellen
 youtube = build('youtube', 'v3', developerKey=api_key)
 
 # Intent mit message_content hinzufügen
 intents = discord.Intents.all()
+intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
@@ -99,7 +106,7 @@ async def check_youtube_channel():
                     minutes += int(minutes_part)
                 
                 if minutes >= 2:
-                    message = f"Hey @everyone **Niklas Steenfatt** hat gerade ein neues Video gepostet. Schau es dir bis zum Schluss an und hinterlasse einen netten Kommentar. \n[{video_title}]({video_link})"
+                    message = f"Hey @everyone **Youtuber** hat gerade ein neues Video gepostet. Schau es dir bis zum Schluss an und hinterlasse einen netten Kommentar. \n[{video_title}]({video_link})"
                     
                     # Video-Link in der Datenbank speichern
                     zeiger.execute("INSERT INTO videos (link) VALUES (?)", (video_link,))
@@ -117,6 +124,4 @@ async def post_to_discord(message):
     await channel.send(message)    
     
 
-
-# Bot starten
-bot.run(os.getenv('TOKEN'))
+bot.run(TOKEN)
